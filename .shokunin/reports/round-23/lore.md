@@ -1,7 +1,7 @@
 # lore round 23
 
 Lane: lore. Round: 23. Axis-move: depth (lowest owned axis; last change was r15).
-Work commit: `08d36f75b0cb3a46fdc3f6a403aeaccf447d9f28` (fixture and books). Report file commits: `346c7933f0546975c1d24383ce8af524f522a995`, then `5e8a2025a5632caa174b200b260ad693157df7ef` (this citation). `git rev-parse HEAD` after the citation commit is `5e8a2025a5632caa174b200b260ad693157df7ef`.
+Work commit: `08d36f75b0cb3a46fdc3f6a403aeaccf447d9f28`. That hash is the fixture and books. Later commits on this branch only adjust this report file. `git rev-parse 08d36f75b0cb3a46fdc3f6a403aeaccf447d9f28` resolves in this repo.
 Baseline before this commit: `d6ea676fa43549c85eba6ea9291399db1b970af4`.
 Worktree branch is `craft/lore-r1`. The dispatch named `craft/lore-r23`; that branch does not exist in this worktree. Work stayed in `/home/vgpnk/Projects/prymeagnt/lore`.
 
@@ -21,7 +21,7 @@ Worktree branch is `craft/lore-r1`. The dispatch named `craft/lore-r23`; that br
 - Decision-table row and fixtures README section for the witnessed-absence class, same LOG entry, same commit.
 - SCORECARD depth row updated to round 23, same commit. Coverage and calibration rows unchanged.
 - Scout, reviewer, verifier, and adjudicator reports under `.shokunin/lore/reports/r23-*.md`, same commit.
-- This report was written after work commit `08d36f75b0cb3a46fdc3f6a403aeaccf447d9f28` and committed as `346c7933f0546975c1d24383ce8af524f522a995`. Citation fix: `5e8a2025a5632caa174b200b260ad693157df7ef`. The fixture hash is the work commit.
+- This report was written after work commit `08d36f75b0cb3a46fdc3f6a403aeaccf447d9f28` and is not part of that commit. Later report-only commits do not change the fixture hash.
 
 ## Before → after measurements
 
