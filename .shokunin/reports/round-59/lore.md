@@ -1,0 +1,16 @@
+# lore round 59 — reject repeated JSON object members
+
+Work commit `9e2887ab087550238cebfda5feaa441f97089234` by lore-shokunin <lore@shokunin.local>. Baseline report commit `7e93686877f7773f946ab89984dee920da8e0cf7`. This report was written after the work commit. No push/merge.
+
+## Delivered move and evidence
+
+- LOG declared one **calibration** claim: Python's default JSON decoder silently retains the last occurrence of a repeated object member before row validation, unlike duplicated row IDs. Eight scouts (`.shokunin/lore/reports/r59-{parser-scout,prior-scout,pair-scout,regression-scout,critic,simplifier,scribe,citation-scout}.md` in `9e2887ab087550238cebfda5feaa441f97089234`) inspected parse behavior. A parent temporary equal-tick/empty-dependency pair showed old `harbor,tower` order produced a `double-booked` finding but reversed `tower,harbor` returned CLEAN. The executor built recursive object-pairs rejection, four fixture dirs, README and `reports/r59-executor.md`. Parent corrected the equal-tick single-`tower` control before non-author review: it now reports the same input-field booking in both old and new checker. Earlier executor CLEAN control output is historical, **not** current fixture output.
+- Non-author `reports/r59-reviewer.md` narrowly PASSed the material calibration: candidate rejects both duplicate orders at `timeline.json` with identical file/member diagnostic, rather than choosing either raw `place_id`. `reports/r59-independent-verifier.md` and Sol `reports/r59-axis-adjudicator.md` independently archived `7e93686`; Sol matched **95/95** old raw stdout/stderr/exit tuples and **474/474** old JSON bytes, audited all **1,149** old corpus paths (only checker/README changed, 20 JSON paths added), and ran the same four candidate inputs under old/current checkers. Old nested duplicate equal-value `source_id` was CLEAN; current rejects at `entities.json` and emits **six downstream dangling-reference findings** after unloading that file. These are bounded, documented loaded-row effects, not six independent in-world mistakes or objective absence. All five r5 malformed controls retain primary diagnostics/counts.
+- Sol verdict: **calibration improved materially; depth unchanged; coverage unchanged — ADMIT**, none materially harmed. Reject-all repeated names in any object, including nested and equal-value repeats, is a **new input-format policy**, not a previously proved prohibition. The hook supplies file and member name only; it does not know an exact row path or decide intended value. An authoritative supported last-wins producer convention or material unique-key regression could falsify this decision. No checker output establishes fictional location, source prose, canon, rights, license or AI-training permission. Active inventory is 99 fixture dirs / 494 fixture JSON paths.
+
+## SHONEN
+
+- [~] Decision table/error patterns: r59 parser/fixture decision table now covers raw duplicate-member masking and nested unload limits; no promotion review.
+- [~] End-to-end task independently reviewed/replayed: r59 reviewer/verifier/Sol; no promotion checkmark.
+- [~] Executable instructions: README and checker policy updated; no promotion review.
+- [~] Province boundary: structural parsing only, no game-mechanics verification or real-world rights/canon claim; no promotion review.
