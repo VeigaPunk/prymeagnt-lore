@@ -5,6 +5,23 @@ import json
 from pathlib import Path
 
 KINDS = {'character', 'place', 'faction', 'item'}
+
+
+class DuplicateMemberError(ValueError):
+    def __init__(self, name):
+        self.name = name
+        super().__init__(name)
+
+
+def unique_object(pairs):
+    result = {}
+    for name, value in pairs:
+        if name in result:
+            raise DuplicateMemberError(name)
+        result[name] = value
+    return result
+
+
 FIELDS = {
     'sources': {'id': str, 'title': str, 'kind': str, 'reliability_note': str},
     'entities': {'id': str, 'kind': str, 'name': str, 'first_appearance': str, 'claims': list},
@@ -18,16 +35,32 @@ FIELDS = {
 def check(directory):
     errors = []
     data = {}
+    entities_available = False
+    sources_available = False
+    timeline_available = False
     for section, fields in FIELDS.items():
         path = directory / (section + '.json')
+        loaded = True
         try:
-            rows = json.loads(path.read_text(encoding='utf-8'))
+            rows = json.loads(path.read_text(encoding='utf-8'), object_pairs_hook=unique_object)
+        except DuplicateMemberError as exc:
+            errors.append(f"{path.name}: duplicate object member {exc.name!r}; cannot load JSON")
+            rows = []
+            loaded = False
         except (OSError, UnicodeError, json.JSONDecodeError) as exc:
             errors.append(f'{path.name}: cannot load JSON: {exc}')
             rows = []
+            loaded = False
         if not isinstance(rows, list):
             errors.append(f'{path.name}: expected array')
             rows = []
+            loaded = False
+        if section == 'entities' and loaded:
+            entities_available = True
+        elif section == 'sources' and loaded:
+            sources_available = True
+        elif section == 'timeline' and loaded:
+            timeline_available = True
         data[section] = []
         for index, row in enumerate(rows):
             location = f'{section}[{index}]'
@@ -62,6 +95,8 @@ def check(directory):
         event_id_counts[event['id']] = event_id_counts.get(event['id'], 0) + 1
 
     def source_status(source_id):
+        if not sources_available:
+            return 'unavailable'
         count = source_id_counts.get(source_id, 0)
         return 'unknown' if count == 0 else 'unique' if count == 1 else 'ambiguous'
 
@@ -89,6 +124,9 @@ def check(directory):
             if not isinstance(field, str) or field not in allowed_assertion_fields:
                 errors.append(f'{side_location}.field: expected one of {sorted(allowed_assertion_fields)}')
                 continue
+            if not timeline_available:
+                errors.append(f'{side_location}.event_id: cannot assess event {event_id!r}: timeline.json unavailable')
+                continue
             if event_id_counts.get(event_id, 0) != 1:
                 errors.append(f'{side_location}.event_id: expected exactly one timeline event {event_id!r}')
                 continue
@@ -110,21 +148,25 @@ def check(directory):
         source(row['first_appearance'], location + '.first_appearance')
         for i, claim in enumerate(row['claims']):
             label = f'{location}.claims[{i}]'
-            if not isinstance(claim, dict) or not isinstance(claim.get('statement'), str) or not claim['statement'].strip() or not isinstance(claim.get('source_id'), str):
+            if not isinstance(claim, dict) or not isinstance(claim.get('statement'), str) or not claim['statement'].strip() or not isinstance(claim.get('source_id'), str) or not claim['source_id'].strip():
                 errors.append(f'{label}: expected nonempty statement and source_id')
             else:
                 source(claim['source_id'], label + '.source_id')
-
-    for location, row in data['relations']:
-        for endpoint in ('from', 'to'):
-            if row[endpoint] not in entities:
-                errors.append(f'{location}.{endpoint}: dangling entity {row[endpoint]!r}')
-        source(row['source_id'], location + '.source_id')
 
     # Only distinct, resolvable faction pairs participate; self-edges are out of scope.
     entity_id_counts = {}
     for _, entity in data['entities']:
         entity_id_counts[entity['id']] = entity_id_counts.get(entity['id'], 0) + 1
+
+    for location, row in data['relations']:
+        if entities_available:
+            for endpoint in ('from', 'to'):
+                entity_id = row[endpoint]
+                if entity_id not in entities:
+                    errors.append(f'{location}.{endpoint}: dangling entity {entity_id!r}')
+                elif entity_id_counts[entity_id] > 1:
+                    errors.append(f'{location}.{endpoint}: ambiguous entity {entity_id!r}')
+        source(row['source_id'], location + '.source_id')
 
     for location, item in data['entities']:
         if 'provenance' not in item:
@@ -138,7 +180,7 @@ def check(directory):
             continue
         previous_holder = None
         previous_tick = None
-        can_check_chain = item['kind'] == 'item' and entity_id_counts[item['id']] == 1
+        can_check_chain = sources_available and item['kind'] == 'item' and entity_id_counts[item['id']] == 1
         chain_has_ambiguous_source = False
         for i, record in enumerate(records):
             record_label = f'{label}[{i}]'
@@ -185,7 +227,7 @@ def check(directory):
                 valid = False
             else:
                 citation_status = source(source_id, record_label + '.source_id')
-                if citation_status == 'unknown':
+                if citation_status in ('unknown', 'unavailable'):
                     valid = False
                 elif citation_status == 'ambiguous':
                     chain_has_ambiguous_source = True
@@ -206,6 +248,8 @@ def check(directory):
 
     allied = [row for _, row in data['relations'] if row['type'] == 'allied_with']
     for location, row in data['relations']:
+        if not entities_available:
+            continue
         left, right = row['from'], row['to']
         if row['type'] != 'allied_with' or left == right:
             continue
@@ -219,28 +263,29 @@ def check(directory):
             and source_status(candidate['source_id']) == 'unique'
             for candidate in allied
         )
-        if not reciprocal:
+        if not reciprocal and sources_available:
             errors.append(f'{location}: allied_with faction relation {left!r} -> {right!r} lacks a sourced reciprocal relation')
 
     occupied = {}
     for location, row in data['timeline']:
-        for field in ('entity_id', 'place_id'):
-            if row[field] not in entities:
-                errors.append(f'{location}.{field}: dangling entity {row[field]!r}')
         actor_id_count = entity_id_counts.get(row['entity_id'], 0)
-        ambiguous_actor = actor_id_count > 1
-        if ambiguous_actor:
-            errors.append(f'{location}.entity_id: ambiguous actor entity {row["entity_id"]!r}')
         place_id_count = entity_id_counts.get(row['place_id'], 0)
-        if place_id_count > 1:
-            errors.append(f'{location}.place_id: ambiguous place entity {row["place_id"]!r}')
-        elif place_id_count == 1 and entities[row['place_id']]['kind'] != 'place':
-            errors.append(f'{location}.place_id: not a place {row["place_id"]!r}')
+        comparable_place = False
+        if entities_available:
+            for field in ('entity_id', 'place_id'):
+                if row[field] not in entities:
+                    errors.append(f'{location}.{field}: dangling entity {row[field]!r}')
+            if actor_id_count > 1:
+                errors.append(f'{location}.entity_id: ambiguous actor entity {row["entity_id"]!r}')
+            if place_id_count > 1:
+                errors.append(f'{location}.place_id: ambiguous place entity {row["place_id"]!r}')
+            elif place_id_count == 1 and entities[row['place_id']]['kind'] != 'place':
+                errors.append(f'{location}.place_id: not a place {row["place_id"]!r}')
+            comparable_place = place_id_count == 1 and entities[row['place_id']]['kind'] == 'place'
         source(row['source_id'], location + '.source_id')
         if row['tick'] < 0:
             errors.append(f'{location}.tick: must be nonnegative')
-        comparable_place = place_id_count == 1 and entities[row['place_id']]['kind'] == 'place'
-        if actor_id_count == 1 and comparable_place and row['tick'] >= 0:
+        if entities_available and actor_id_count == 1 and comparable_place and row['tick'] >= 0:
             slot = (row['entity_id'], row['tick'])
             if slot in occupied and occupied[slot][1] != row['place_id']:
                 previous, prior_place = occupied[slot]
