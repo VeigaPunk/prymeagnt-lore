@@ -1,0 +1,16 @@
+# lore round 61 — distinguish unavailable source index
+
+Work commit `e34a7750f098651a92099adfd6e280c59a642ed7` by lore-shokunin <lore@shokunin.local>; pinned baseline r60 report `e72d3db5d6c6055b0863274dd151ae664508256a`. This report was written after work commit. No push/merge.
+
+## Delivered move and evidence
+
+- One declared **calibration** claim in `.shokunin/lore/LOG.md`: failed `sources.json` was converted to an empty source index, so direct citations and indirect ledger, provenance and alliance paths asserted unknown/unsourced results without a lookup. Eight scouts were mixed: source-specific matched probes conditionally GO; critics warned r5/r60 analogy alone and lost affected-reference pointers cannot establish gain. Candidate is source-only; valid loaded empty/partial/duplicate arrays retain prior lookup semantics, and malformed row filtering still indexes retained rows. Direct file/shape error remains on source outage; source-dependent conclusions become unassessable, not CLEAN. Twelve paired dirs under `.shokunin/lore/corpus/fixtures/r61-*` and README document the policy.
+- The executor's first `r61-independent-unavailable/sources.json` was actually a loaded array; parent corrected **only that new source file** to invalid JSON before review. Historical executor output is preserved and corrected current output appended in `reports/r61-executor.md`. Corrected pair shares other four tables; unavailable source yields file-load error plus five independent provenance kind/holder and timeline tick/dependency findings. Ledger unavailable retains independent pointer/endpoint/inversion/booking; allied unavailable does not conclude a sourced reciprocal is missing solely from absent source index.
+- Non-author reviewer PASSed narrow material calibration; independent verifier and Sol separately archived pinned `e72d3db`. Sol audited **1,189 old corpus paths** (1,187 byte-identical; checker and README changed; 60 new JSON), all **514** old fixture JSON bytes, and **103/103** old raw stdout/stderr/exit tuples identical. Its same-byte candidate replays show loaded empty/partial/ambiguous output unchanged, unavailable direct inputs 12→1 (primary error retained, eleven unsupported source findings withheld), corrected independent 18→6, allied 7→1, ledger 22→5. Loaded r39, r32, r5 and out-of-repo provenance chain probes preserved prior valid-index results. Sol: **calibration materially improved; depth unchanged; coverage unchanged — ADMIT**, none materially harmed. Lost per-reference repair pointers are a real cost, addressed by fixing source table and rerunning; no finding proves source prose, fictional-world absence, actual chronology/canon, rights, license, or permission. Inventory 115 fixture dirs / 574 JSON paths.
+
+## SHONEN
+
+- [~] Decision table/error patterns: source availability and indirect ledger/provenance/alliance controls recorded; no promotion review.
+- [~] End-to-end task independently reviewed/replayed: reviewer/verifier/Sol; no promotion checkmark.
+- [~] Executable instructions: checker and fixture README state scope, loaded-row limit and repair-pointer cost; no promotion review.
+- [~] Province boundary: source ID membership only, not source prose, world/canon/rights or game-mechanics verification; no promotion review.
